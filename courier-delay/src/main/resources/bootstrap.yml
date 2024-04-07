@@ -1,0 +1,14 @@
+debug: false
+server:
+  port: 11115
+encrypt.failOnError: false
+
+spring:
+  application:
+    name: courier-delay
+
+nacos:
+  config:
+    server-addr: http://ec-nacos.xxx.com
+    namespace: alpha
+    group: kmw

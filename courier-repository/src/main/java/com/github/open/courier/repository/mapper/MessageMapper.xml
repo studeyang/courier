@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.open.courier.repository.mapper.MessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.DBMessage">
+        <id column="message_id" property="messageId" jdbcType="VARCHAR"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="cluster" property="cluster" jdbcType="VARCHAR"/>
+        <result column="env" property="env" jdbcType="VARCHAR"/>
+        <result column="from_service" property="fromService" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="INTEGER"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="primary_key" property="primaryKey" jdbcType="VARCHAR"/>
+        <result column="usage" property="usage" jdbcType="VARCHAR"/>
+        <result column="offset" property="offset" jdbcType="BIGINT"/>
+        <result column="partition" property="partition" jdbcType="INTEGER"/>
+        <result column="event" property="event" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        message_id, topic, `type`, cluster, env,
+        from_service, content, created_at, primary_key, `usage`,
+        `offset`, `partition`,`event`
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO `courier_message` ( <include refid="Base_Column_List"/> ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.messageId},
+            #{item.topic},
+            #{item.type},
+            #{item.cluster},
+            #{item.env},
+            #{item.fromService},
+            #{item.content},
+            #{item.createdAt},
+            #{item.primaryKey},
+            #{item.usage},
+            #{item.offset},
+            #{item.partition},
+            #{item.event}
+            )
+        </foreach>
+    </insert>
+
+    <select id="listByMessageIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_message` WHERE message_id IN
+        <foreach collection="queryCondition.messageIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        AND created_at BETWEEN #{queryCondition.startTime} AND #{queryCondition.endTime}
+    </select>
+
+    <sql id="query_condition">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="messageId != null and messageId != ''">
+                AND message_id = #{messageId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND created_at BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="event != null and event!= ''">
+                AND event = #{event}
+            </if>
+            <if test="fromService != null and fromService != ''">
+                AND from_service = #{fromService}
+            </if>
+            <if test="content != null and content != ''">
+                AND content like CONCAT('%', #{content}, '%')
+            </if>
+        </trim>
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM courier_message
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="countQuery" resultType="int">
+        SELECT count(1)
+        FROM courier_message
+        <include refid="query_condition"/>
+    </select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM courier_message
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="listTableNames" resultType="java.lang.String">
+        SELECT
+            table_name
+        FROM information_schema.TABLES
+        WHERE table_schema = 'ec_courier'
+            AND TABLE_NAME LIKE CONCAT (#{tableName}, '%' );
+    </select>
+
+    <update id="createTable" parameterType="java.lang.String">
+        CREATE TABLE if not exists ${tableName} LIKE courier_message;
+    </update>
+
+    <update id="dropTable" parameterType="java.lang.String">
+        drop table if exists ${tableName}
+    </update>
+
+</mapper>

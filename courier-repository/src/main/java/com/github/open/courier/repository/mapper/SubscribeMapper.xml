@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.github.open.courier.repository.mapper.SubscribeMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.repository.entity.SubscribeEntity">
+        <result column="cluster" property="cluster" jdbcType="VARCHAR"/>
+        <result column="service" property="service" jdbcType="VARCHAR"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="env_tag" property="envTag" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        cluster, service, topic, group_id, `type`, env_tag
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO `courier_subscribe`(cluster, service, topic, group_id, `type`, env_tag, subscribed_at) VALUES
+        <foreach collection="collection" item="item" separator=",">
+            (
+            #{item.cluster},
+            #{item.service},
+            #{item.topic},
+            #{item.groupId},
+            #{item.type},
+            #{item.envTag},
+            NOW()
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteByClusterAndService">
+        DELETE FROM `courier_subscribe` WHERE cluster = #{cluster} and service = #{service}
+    </delete>
+
+    <select id="listByService" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+        WHERE cluster = #{cluster}
+        AND service = #{service}
+    </select>
+
+    <select id="listByServices" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+        WHERE
+        cluster = #{cluster}
+        AND service IN
+        <foreach collection="collection" item="service" separator="," open="(" close=")">
+            #{service}
+        </foreach>
+    </select>
+
+    <select id="listAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+    </select>
+
+    <select id="findMetaDatasByPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+        <where>
+            <if test="cluster != null and cluster != ''">
+                AND cluster = #{cluster}
+            </if>
+            <if test="service != null and service != ''">
+                AND service = #{service}
+            </if>
+            <if test="topic != null and topic!= ''">
+                AND topic = #{topic}
+            </if>
+            <if test="groupId != null and groupId != ''">
+                AND group_id = #{groupId}
+            </if>
+            <if test="type != null and type != ''">
+                AND `type` like CONCAT('%', #{type}, '%')
+            </if>
+            <choose>
+                <when test="isGray != null and isGray == false">
+                    AND env_tag IS NULL
+                </when>
+                <when test="isGray != null and isGray == true">
+                    AND env_tag IS NOT NULL
+                </when>
+            </choose>
+        </where>
+    </select>
+
+    <update id="assignMessagePushEnv">
+        UPDATE `courier_subscribe` SET env_tag = #{env}
+        WHERE cluster = #{cluster} AND service = #{service} AND `type` =  #{type}
+    </update>
+
+    <update id="clearMessagePushEnv">
+        UPDATE `courier_subscribe`
+        SET env_tag = null
+        WHERE cluster = #{cluster} AND service = #{service} AND `type` =  #{type}
+    </update>
+
+    <select id="listEnableService" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+        WHERE service NOT IN (
+        SELECT d.service FROM courier_subscribe_manage d
+        WHERE d.is_enable = 0
+        )
+    </select>
+
+    <select id="checkConflict" resultMap="BaseResultMap">
+        SELECT
+        cluster, service, topic, group_id
+        FROM `courier_subscribe`
+        WHERE
+        group_id IN
+        <foreach collection="groupIds" item="groupId" separator="," open="(" close=")">
+            #{groupId}
+        </foreach>
+        LIMIT 1
+    </select>
+
+    <select id="queryByService" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe`
+        WHERE service = #{service}
+        AND service NOT IN (
+        SELECT d.service FROM courier_subscribe_manage d
+        WHERE d.service = #{service}
+        AND d.is_enable = 0
+        )
+    </select>
+
+    <select id="selectEnvTag" resultMap="BaseResultMap">
+        SELECT topic, `type`, env_tag
+        FROM `courier_subscribe`
+        WHERE cluster = #{cluster}
+        AND service=#{service}
+        AND env_tag IS NOT NULL
+    </select>
+
+    <select id="findAssignedGroupIdAndType" resultMap="BaseResultMap">
+        SELECT group_id, `type`, env_tag
+        FROM `courier_subscribe`
+        WHERE env_tag IS NOT NULL
+    </select>
+
+</mapper>

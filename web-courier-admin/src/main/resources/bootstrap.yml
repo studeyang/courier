@@ -1,0 +1,43 @@
+server:
+  port: 11114
+  contextPath: /courier-admin
+encrypt.failOnError: false
+
+management:
+  port: 31114
+  contextPath: /hellgate
+  security.enabled: false
+
+spring:
+  application:
+    name: web-courier-admin
+  freemarker:
+    template-loader-path: classpath:/templates/
+    request-context-attribute: request
+  session.store-type: redis
+
+nacos:
+  config:
+    server-addr: http://ec-nacos.xxx.com
+    namespace: alpha
+    group: kmw
+
+icec:
+  resources:
+    webRoot: http://webagent.javats.com:10000
+    commonStatic: ${icec.resources.webRoot}/static
+    contextPath: ${icec.resources.webRoot}${server.contextPath}
+    webStatic: ${icec.resources.webRoot}${server.contextPath}/static
+  security:
+    userInfoEndpointUrl: https://test-api.xxx.com/passport/userinfo
+
+---
+spring:
+  profiles: prod
+icec:
+  resources:
+    webRoot: https://www.cassmall.com
+    commonStatic: https://file.cassmall.com/static
+    webStatic: https://file.cassmall.com${server.contextPath}/static
+  security:
+    userInfoEndpointUrl: http://passport.intra.cassmall.com/passport/userinfo

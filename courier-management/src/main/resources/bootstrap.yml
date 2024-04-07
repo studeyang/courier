@@ -1,0 +1,27 @@
+debug: false
+server:
+  port: 11113
+encrypt.failOnError: false
+
+spring:
+  application:
+    name: courier-management
+
+nacos:
+  config:
+    server-addr: http://ec-nacos.xxx.com
+    namespace: alpha
+    group: kmw
+  discovery:
+    server-addr: ${nacos.config.server-addr}
+    namespace: ${nacos.config.namespace}
+
+# pagehelper
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+---
+spring:
+  profiles: default

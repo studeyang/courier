@@ -1,0 +1,18 @@
+debug: false
+server:
+  port: 11116
+encrypt.failOnError: false
+
+spring:
+  config:
+    location: file:./config/courier-agent.yml
+  application:
+    name: courier-agent
+
+casslog:
+  accessLogEnabled: true
+logging:
+  level:
+    com.github.open.discovery.kubernetes.KubernetesService: error
+
+#-Dreactor.netty.http.server.accessLogEnabled=true

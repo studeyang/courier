@@ -1,0 +1,9 @@
+{
+  "mvnOptionsMap": {
+    "courier-client/pom.xml": "-U -Dautoconfig.skip=true deploy",
+    "courier-core/pom.xml": "-U -Dautoconfig.skip=true deploy",
+    "courier-spring-boot-starter/pom.xml": "-U -Dautoconfig.skip=true deploy",
+    "all": "-U -Dautoconfig.skip=true install"
+  },
+  "buildOnChanges": false
+}

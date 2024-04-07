@@ -1,0 +1,23 @@
+debug: false
+server:
+  port: 11112
+encrypt.failOnError: false
+
+management.endpoints.web.exposure.include: "*"
+
+spring:
+  application:
+    name: courier-consumer
+
+nacos:
+  config:
+    server-addr: http://ec-nacos.xxx.com
+    namespace: alpha
+    group: kmw
+  discovery:
+    server-addr: ${nacos.config.server-addr}
+    namespace: ${nacos.config.namespace}
+
+fx-api:
+  productId: 17
+  conditionalProfile: kmw-alpha

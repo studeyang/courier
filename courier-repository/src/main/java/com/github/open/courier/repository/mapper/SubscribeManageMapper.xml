@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.github.open.courier.repository.mapper.SubscribeManageMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.SubscribeManageDTO">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="service" property="service" jdbcType="VARCHAR"/>
+        <result column="consumer_node" property="consumerNode" jdbcType="VARCHAR"/>
+        <result column="is_enable" property="enable" jdbcType="BOOLEAN"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id, service, consumer_node, is_enable
+    </sql>
+
+    <insert id="insert" parameterType="com.github.open.courier.core.transport.SubscribeManageDTO">
+        INSERT INTO `courier_subscribe_manage` (service, consumer_node, is_enable) VALUES
+            (
+            #{service},
+            #{consumerNode},
+            #{enable}
+            )
+    </insert>
+
+    <delete id="deleteByService">
+        DELETE FROM `courier_subscribe_manage` WHERE service = #{service}
+    </delete>
+
+    <select id="queryByService" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe_manage`
+        WHERE service = #{service}
+    </select>
+
+    <select id="queryAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe_manage`
+    </select>
+
+    <select id="queryDisableService" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_subscribe_manage`
+        WHERE is_enable = 0
+    </select>
+
+    <update id="update" parameterType="com.github.open.courier.core.transport.SubscribeManageDTO">
+        UPDATE courier_subscribe_manage
+        <set>
+            <if test="consumerNode != null">consumer_node = #{consumerNode},</if>
+            <if test="enable != null">is_enable = #{enable}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

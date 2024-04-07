@@ -1,0 +1,97 @@
+spring:
+  profiles: configMap
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos-0.nacos-headless.nacos.svc.cluster.local:8848,nacos-1.nacos-headless.nacos.svc.cluster.local:8848
+        namespace: alpha
+        clusterName: cassmall
+    gateway:
+      httpclient:
+        connect-timeout: 1000
+        response-timeout: 5s
+      routes:
+        - id: courier-management
+          filters:
+            - PrefixPath=/courier-management
+          predicates:
+            - Path=/courier/failmessage/send, /courier/failmessages/send, /courier/successmessages/handle, /courier/failmessages/handle
+          uri: ${courier.agent.proxyUrl}
+
+        - id: courier-consumer
+          filters:
+            - PrefixPath=/courier-consumer
+          predicates:
+            - Path=/courier/messages/record
+          uri: ${courier.agent.proxyUrl}
+courier:
+  agent:
+    proxyUrl: http://kmw-alpha.intra.xxx.com
+    cluster: cassmall
+    env: kunlun
+    discovery:
+      courier-oneclassicmsgreceive-service: http://api.ewewo.com/api/store/MessageBusEventReceive
+      SAP: http://api.xxx.com:50000/RESTAdapter/Rest/ICEC/SAP/Messages/PullMessages/Post/Out/Asy
+      webIm-service: https://www.xxx.com/webim/misc/ec_message/callback
+      xm-bff: https://xm.xxx.com/xm-bff/misc/ec_message/callback
+icloud:
+  kubernetes:
+    clients:
+      - cluster: cassmall
+        includeNamespaces:
+          - infra
+
+---
+# 供本地启全套环境用
+spring:
+  profiles: default
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ec-nacos.xxx.com:18848,ec-nacos.xxx.com:18849
+        namespace: alpha
+        clusterName: ${courier.agent.cluster}
+        ip: 10.118.32.94
+    discovery:
+      client:
+        simple:
+          instances:
+            courier-example:
+              - uri: http://localhost:11117
+              - uri: http://localhost:11118
+              - uri: http://localhost:11119
+            example-consumer:
+              - uri: http://localhost:20001
+    gateway:
+      routes:
+        - id: courier-management
+          predicates:
+            - Path=/courier/failmessage/send, /courier/failmessages/send, /courier/successmessages/handle, /courier/failmessages/handle
+          uri: http://localhost:11113
+
+        - id: courier-consumer
+          predicates:
+            - Path=/courier/messages/record
+          uri: http://localhost:11112
+#proxy local
+courier:
+  agent:
+    registerServiceScope: true
+    proxyUrl: http://localhost
+    proxyProducerPrefix: :11111
+    proxyConsumerPrefix: :11112
+    proxyDelayPrefix: :11115
+    cluster: cassmall
+    #    excludes:
+    #      - cass-passport
+    discovery:
+      terminal-collection-service: ''
+icloud:
+  kubernetes:
+    clients:
+      - cluster: cassmall
+        apiServerUrl: https://10.17.86.31:5443
+        caCertFileUrl: secret/ca-alpha.crt
+        oauth2Token: eyJhbGciOiJSUzI1NiIsImtpZCI6IkEzam1NV1JmUzJpeEZSY0NaZVBXLXgxLVdKTlJwdnN2NUt6UjhBMHllUjQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJpbmZyYSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJpbmZyYS1nYXRld2F5LXRva2VuLXI3YzY3Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImluZnJhLWdhdGV3YXkiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJjNmFiNzBhYy1lMmFhLTQxNWEtOTY0OC1lZGIzMDMwYjFiOGEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6aW5mcmE6aW5mcmEtZ2F0ZXdheSJ9.KyHwl5OJfADjawGJEyuyQWc51LkIsYZFPmFnK1SeUz6iamblYAvS2F2AlnJbK3lPO651C8GJ763SwaTbbufEPcqtU1qlrtQztw04khIpKgRnZuQOTvRShg04wli_yd5J-72lHh7iyWxG0NdAhD79LMPbbxRrOr4oYhB3sfbfGkuCd2N0JJUVuJBm3SmOvBOQfjZCGonwScebGwgNbdBuJPBzFoJQd1Kqj3LJYx_g8b9kmTlca53_5j36w-9iX4snIY8Voj8dLzotwZRDJkx3Wuk8AoYg2qWXiiehd8qAn0pMf3jYAuTKLdIDpQfuOqLqLBJ0pwnZGs6wXObYS38L9g
+        includeNamespaces:
+          - infra

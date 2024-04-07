@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.open.courier.repository.mapper.SubscribeGroupIdMapper">
+
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.SubscribeGroupId">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="state" property="state" jdbcType="TINYINT"/>
+        <result column="holder" property="holder" jdbcType="VARCHAR"/>
+        <result column="holded_at" property="holdedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, state, holder, holded_at
+    </sql>
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM courier_subscribe_group_id AS t
+        where state = '1'
+    </select>
+
+    <insert id="insert" >
+        insert into courier_subscribe_group_id (id, state, holder, holded_at)
+        values (#{id}, #{state}, #{holder}, #{time})
+    </insert>
+
+    <insert id="update" >
+        update courier_subscribe_group_id
+        set
+          state=#{state}, holder=#{holder}, holded_at=#{time}
+        where
+          id=#{id}
+    </insert>
+
+    <select id="selectIdById" resultType="java.lang.String">
+        select id from courier_subscribe_group_id
+        where id = #{id} and holder is not null
+    </select>
+
+    <select id="selectId" resultType="java.lang.String">
+        select id from courier_subscribe_group_id
+        where id = #{id}
+    </select>
+
+    <delete id="release">
+        delete from courier_subscribe_group_id
+        WHERE
+        id = #{id} AND holder = #{holder}
+    </delete>
+
+    <update id="releaseByIds">
+        UPDATE courier_subscribe_group_id
+        SET
+        state = '0',
+        holded_at = NOW(3)
+        WHERE
+        id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="deleteByIds">
+        delete from courier_subscribe_group_id
+        WHERE
+        id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

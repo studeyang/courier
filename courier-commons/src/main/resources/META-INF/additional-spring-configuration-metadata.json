@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "courier.server.producer",
+      "type": "java.lang.String",
+      "description": "Courier producer 的地址.",
+      "defaultValue": "service-courier-producer:11111"
+    },
+    {
+      "name": "courier.server.consumer",
+      "type": "java.lang.String",
+      "description": "Courier consumer 的地址.",
+      "defaultValue": "service-courier-consumer:11112"
+    },
+    {
+      "name": "courier.server.management",
+      "type": "java.lang.String",
+      "description": "Courier management 的地址.",
+      "defaultValue": "service-courier-management:11113"
+    }
+  ]
+}

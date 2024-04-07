@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.github.open.courier.repository.mapper.SendFailMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.SendFailMessage">
+        <id column="message_id" property="messageId" jdbcType="VARCHAR"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="cluster" property="cluster" jdbcType="VARCHAR"/>
+        <result column="env" property="env" jdbcType="VARCHAR"/>
+        <result column="service" property="service" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="VARCHAR"/>
+        <result column="primary_key" property="primaryKey" jdbcType="INTEGER"/>
+        <result column="usage" property="usage" jdbcType="TIMESTAMP"/>
+        <result column="retries" property="retries" jdbcType="VARCHAR"/>
+        <result column="reason" property="reason" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        message_id, topic, `type`, cluster, env,
+         service, content, created_at, primary_key, `usage`,
+          retries, reason
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO `courier_send_fail_message` VALUES
+        (
+        #{messageId},
+        #{topic},
+        #{type},
+        #{cluster},
+        #{env},
+        #{service},
+        #{content},
+        #{createdAt},
+        #{primaryKey},
+        #{usage},
+        #{retries},
+        #{reason}
+        )
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO `courier_send_fail_message` VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.messageId},
+            #{item.topic},
+            #{item.type},
+            #{item.cluster},
+            #{item.env},
+            #{item.service},
+            #{item.content},
+            #{item.createdAt},
+            #{item.primaryKey},
+            #{item.usage},
+            #{item.retries},
+            #{item.reason}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatch">
+        DELETE FROM `courier_send_fail_message` WHERE message_id IN
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByMessageIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_send_fail_message` WHERE message_id IN
+        <foreach collection="list" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <sql id="query_condition">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="messageId != null and messageId != ''">
+                AND message_id = #{messageId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND created_at BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="event != null and event!= ''">
+                AND type like CONCAT('%','${event}','%')
+            </if>
+            <if test="fromService != null and fromService != ''">
+                AND service = #{fromService}
+            </if>
+            <if test="content != null and content != ''">
+                AND content like CONCAT('%','${content}','%')
+            </if>
+        </trim>
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_send_fail_message` AS t
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="queryAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_send_fail_message` AS t
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="countQuery" resultType="int">
+        SELECT count(1)
+        FROM `courier_send_fail_message` AS t
+        <include refid="query_condition"/>
+    </select>
+
+</mapper>

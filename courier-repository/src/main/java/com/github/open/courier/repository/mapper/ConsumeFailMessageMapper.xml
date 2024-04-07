@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.github.open.courier.repository.mapper.ConsumeFailMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.ConsumeFailMessage">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="message_id" property="messageId" jdbcType="VARCHAR"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+        <result column="service" property="service" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="primary_key" property="primaryKey" jdbcType="VARCHAR"/>
+        <result column="usage" property="usage" jdbcType="VARCHAR"/>
+        <result column="retries" property="retries" jdbcType="INTEGER"/>
+        <result column="reason" property="reason" jdbcType="VARCHAR"/>
+        <result column="need_repush" property="needRepush" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, message_id, topic, type, group_id, service, created_at, primary_key, `usage`, retries, reason, need_repush
+    </sql>
+
+    <delete id="deleteBatch">
+        DELETE FROM `courier_consume_fail_message` WHERE id IN
+        <foreach collection="collection" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insertBatch">
+        INSERT IGNORE INTO `courier_consume_fail_message` VALUES
+        <foreach collection="list" item="message" separator=",">
+            (
+            #{message.id},
+            #{message.messageId},
+            #{message.topic},
+            #{message.type},
+            #{message.groupId},
+            #{message.service},
+            #{message.createdAt},
+            #{message.primaryKey},
+            #{message.usage},
+            #{message.retries},
+            #{message.reason},
+            #{message.needRepush}
+            )
+        </foreach>
+    </insert>
+
+    <select id="listRepush" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_consume_fail_message`
+        WHERE need_repush = '1'
+        LIMIT #{size}
+    </select>
+
+    <update id="updateNeedRepushByIds">
+        UPDATE `courier_consume_fail_message`
+        SET need_repush = '0'
+        WHERE id IN
+        <foreach collection="collection" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <sql id="query_condition">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="consumeId != null and consumeId != ''">
+                AND id = #{consumeId}
+            </if>
+            <if test="messageId != null and messageId != ''">
+                AND message_id = #{messageId}
+            </if>
+            <if test="toService != null and toService != ''">
+                AND service = #{toService}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND created_at BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </trim>
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_consume_fail_message`
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="queryConsumeRecord" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM `courier_consume_fail_message`
+        <include refid="query_condition"/>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="countQuery" resultType="int">
+        SELECT count(1)
+        FROM `courier_consume_fail_message`
+        <include refid="query_condition"/>
+    </select>
+
+</mapper>

@@ -1,0 +1,20 @@
+server:
+  port: 11117
+spring:
+  application:
+    name: courier-example
+
+courier:
+  brokers: kafka1-alpha.xxx.com:9092,kafka2-alpha.xxx.com:9092,kafka3-alpha.xxx.com:9092
+  topic-prefix: alpha
+  agent:
+    url: http://localhost:11116
+
+---
+spring:
+  profiles: local
+courier:
+  consumer:
+    async:
+      queueCapacity: 5000
+

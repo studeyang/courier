@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.open.courier.repository.mapper.ConsumeRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.open.courier.core.transport.ConsumeRecord">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="message_id" property="messageId" jdbcType="VARCHAR"/>
+        <result column="from_service" property="fromService" jdbcType="VARCHAR"/>
+        <result column="to_service" property="toService" jdbcType="VARCHAR"/>
+        <result column="topic" property="topic" jdbcType="VARCHAR"/>
+        <result column="group_id" property="groupId" jdbcType="VARCHAR"/>
+        <result column="retries" property="retries" jdbcType="INTEGER"/>
+        <result column="state" property="state" jdbcType="VARCHAR"/>
+        <result column="need_repush" property="needRepush" jdbcType="TINYINT"/>
+        <result column="poll_time" property="pollTime" jdbcType="TIMESTAMP"/>
+        <result column="before_push_time" property="beforePushTime" jdbcType="TIMESTAMP"/>
+        <result column="end_push_time" property="endPushTime" jdbcType="TIMESTAMP"/>
+        <result column="client_receive_time" property="clientReceiveTime" jdbcType="TIMESTAMP"/>
+        <result column="client_end_time" property="clientEndTime" jdbcType="TIMESTAMP"/>
+        <result column="client_handled_cost" property="clientHandledCost" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="base_column_list">
+        id, message_id, from_service, to_service, topic, group_id, retries, state, need_repush,
+        poll_time, before_push_time, end_push_time, client_receive_time, client_end_time, client_handled_cost
+    </sql>
+
+    <insert id="insertBatch">
+        INSERT INTO `courier_consume_record` ( <include refid="base_column_list"/> ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.messageId},
+            #{item.fromService},
+            #{item.toService},
+            #{item.topic},
+            #{item.groupId},
+            #{item.retries},
+            'COMMITED',
+            #{item.needRepush},
+            #{item.pollTime},
+            null,
+            null,
+            null,
+            null,
+            0
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchAddPushTime">
+        INSERT INTO `courier_consume_record` ( <include refid="base_column_list"/> )
+        VALUES
+        <foreach collection="messages" item="message" separator=",">
+            (
+            #{message.id},
+            #{message.messageId},
+            #{message.fromService},
+            #{message.toService},
+            #{message.topic},
+            #{message.groupId},
+            #{message.retries},
+            'COMMITED',
+            #{message.needRepush},
+            #{message.pollTime},
+            #{message.pollTime},
+            #{message.pollTime},
+            null,
+            null,
+            0
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateStateAndClientTimeByIds">
+        UPDATE
+        `courier_consume_record`
+        SET
+        need_repush = 0,
+        state = 'HANDLED',
+        client_receive_time = #{clientReceiveTime},
+        client_end_time = #{clientEndTime},
+        client_handled_cost = #{clientHandledCost}
+        WHERE
+        id = #{id}
+        AND poll_time BETWEEN #{pollStartTime} AND #{pollEndTime}
+    </update>
+
+    <update id="updateByIdsSelective">
+        UPDATE `courier_consume_record`
+        <set>
+            <if test="retries != null">
+                retries = #{retries},
+            </if>
+            <if test="state != null">
+                state = #{state},
+            </if>
+            <if test="needRepush != null">
+                need_repush = #{needRepush},
+            </if>
+            <if test="beforePushTime != null">
+                before_push_time = #{beforePushTime},
+            </if>
+            <if test="endPushTime != null">
+                end_push_time = #{endPushTime},
+            </if>
+            <if test="clientReceiveTime != null">
+                client_receive_time = #{clientReceiveTime},
+            </if>
+            <if test="clientEndTime != null">
+                client_end_time = #{clientEndTime},
+            </if>
+            <if test="clientHandledCost != null">
+                client_handled_cost = #{clientHandledCost},
+            </if>
+        </set>
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND poll_time BETWEEN #{pollTimeBegin} AND #{pollTimeEnd}
+    </update>
+
+    <select id="listTimeOut" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_consume_record`
+        WHERE
+        state = 'COMMITED'
+        AND need_repush = '1'
+        AND poll_time <![CDATA[ >= ]]> #{begin} and poll_time <![CDATA[ <= ]]> #{end}
+        LIMIT #{size}
+    </select>
+
+    <select id="listByIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_consume_record`
+        WHERE id IN
+        <foreach collection="queryCondition.messageIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        AND poll_time BETWEEN #{queryCondition.startTime} AND #{queryCondition.endTime}
+    </select>
+
+    <sql id="query_condition">
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="consumeId != null and consumeId != ''">
+                AND id = #{consumeId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND poll_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="messageId != null and messageId != ''">
+                AND message_id = #{messageId}
+            </if>
+            <if test="fromService != null and fromService != ''">
+                AND from_service = #{fromService}
+            </if>
+            <if test="toService != null and toService != ''">
+                AND to_service = #{toService}
+            </if>
+        </trim>
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_consume_record`
+        <include refid="query_condition"/>
+        ORDER BY poll_time DESC
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="queryConsumeRecord" resultMap="BaseResultMap">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM `courier_consume_record`
+        <include refid="query_condition"/>
+        ORDER BY poll_time DESC
+    </select>
+
+    <select id="countQuery" resultType="int">
+        SELECT count(1)
+        FROM `courier_consume_record`
+        <include refid="query_condition"/>
+    </select>
+
+    <update id="createTable" parameterType="java.lang.String">
+        CREATE TABLE if not exists ${tableName} LIKE courier_consume_record;
+    </update>
+
+
+</mapper>

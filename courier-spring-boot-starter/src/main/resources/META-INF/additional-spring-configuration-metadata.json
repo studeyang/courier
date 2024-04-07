@@ -1,0 +1,153 @@
+{
+  "properties": [
+    {
+      "name": "courier.agent.url",
+      "type": "java.lang.String",
+      "description": "Courier agent 的地址."
+    },
+    {
+      "name": "courier.consumer.pull.pause.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启暂停.",
+      "defaultValue": true
+    },
+    {
+      "name": "courier.consumer.pull.pause.pauseThresholdRate",
+      "type": "java.lang.Double",
+      "description": "暂停阈值率.",
+      "defaultValue": 0.9
+    },
+    {
+      "name": "courier.consumer.pull.pause.resumeThresholdRate",
+      "type": "java.lang.Double",
+      "description": "暂停阈值率.",
+      "defaultValue": 0.5
+    },
+    {
+      "name": "courier.consumer.pull.pause.pauseAndResumeInterval",
+      "type": "java.lang.Integer",
+      "description": "暂停与恢复请求之间的最小时间间隔.",
+      "defaultValue": 15
+    },
+    {
+      "name": "courier.consumer.pull.alarm.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启告警.",
+      "defaultValue": true
+    },
+    {
+      "name": "courier.consumer.pull.alarm.type",
+      "type": "java.lang.String",
+      "description": "告警器类型(ASYNC异步 SYNC同步).",
+      "defaultValue": "ASYNC"
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.corePoolSize",
+      "type": "java.lang.Integer",
+      "description": "核心线程数.",
+      "defaultValue": 1
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.maxPoolSize",
+      "type": "java.lang.Integer",
+      "description": "最大线程数.",
+      "defaultValue": 1
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.keepAliveSeconds",
+      "type": "java.lang.Integer",
+      "description": "超时时间(秒).",
+      "defaultValue": 0
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.queueCapacity",
+      "type": "java.lang.Integer",
+      "description": "队列容量.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.rejectedHandler",
+      "type": "java.lang.String",
+      "description": "拒绝策略(全限定名).",
+      "defaultValue": "java.util.concurrent.ThreadPoolExecutor.AbortPolicy"
+    },
+    {
+      "name": "courier.consumer.pull.alarm.async.threadNamePrefix",
+      "type": "java.lang.String",
+      "description": "线程名前缀.",
+      "defaultValue": "kafka-async-alarm-"
+    },
+    {
+      "name": "courier.consumer.push.pause.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启暂停.",
+      "defaultValue": false
+    },
+    {
+      "name": "courier.consumer.push.pause.pauseThresholdRate",
+      "type": "java.lang.Double",
+      "description": "暂停阈值率.",
+      "defaultValue": 0.9
+    },
+    {
+      "name": "courier.consumer.push.pause.resumeThresholdRate",
+      "type": "java.lang.Double",
+      "description": "暂停阈值率.",
+      "defaultValue": 0.5
+    },
+    {
+      "name": "courier.consumer.push.pause.pauseAndResumeInterval",
+      "type": "java.lang.Integer",
+      "description": "暂停与恢复请求之间的最小时间间隔.",
+      "defaultValue": 15
+    },
+    {
+      "name": "courier.consumer.push.alarm.enable",
+      "type": "java.lang.Boolean",
+      "description": "是否开启告警.",
+      "defaultValue": true
+    },
+    {
+      "name": "courier.consumer.push.alarm.type",
+      "type": "java.lang.String",
+      "description": "告警器类型(ASYNC异步 SYNC同步).",
+      "defaultValue": "ASYNC"
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.corePoolSize",
+      "type": "java.lang.Integer",
+      "description": "核心线程数.",
+      "defaultValue": 1
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.maxPoolSize",
+      "type": "java.lang.Integer",
+      "description": "最大线程数.",
+      "defaultValue": 1
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.keepAliveSeconds",
+      "type": "java.lang.Integer",
+      "description": "超时时间(秒).",
+      "defaultValue": 0
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.queueCapacity",
+      "type": "java.lang.Integer",
+      "description": "队列容量.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.rejectedHandler",
+      "type": "java.lang.String",
+      "description": "拒绝策略(全限定名).",
+      "defaultValue": "java.util.concurrent.ThreadPoolExecutor.AbortPolicy"
+    },
+    {
+      "name": "courier.consumer.push.alarm.async.threadNamePrefix",
+      "type": "java.lang.String",
+      "description": "线程名前缀.",
+      "defaultValue": "kafka-async-alarm-"
+    }
+  ]
+}

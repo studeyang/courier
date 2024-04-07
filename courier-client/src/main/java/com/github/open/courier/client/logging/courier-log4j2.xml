@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<Configuration status="WARN">
+    <Appenders>
+
+        <RollingFile name="CLIENT_METRICS_FILE" fileName="logs/courier-metrics.log"
+                     filePattern="logs/$${date:yyyy-MM}/courier-metrics-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="256MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1000"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.github.open.courier.client.logging.CourierMetricsLog" level="info" additivity="false">
+            <AppenderRef ref="CLIENT_METRICS_FILE"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="CLIENT_METRICS_FILE"/>
+        </Root>
+    </Loggers>
+</Configuration>
